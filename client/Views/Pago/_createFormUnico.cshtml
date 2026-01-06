@@ -1,0 +1,64 @@
+﻿@using Domain.Pagos
+@using Domain.Usuarios
+
+@{
+    IEnumerable<TipoDeGasto>? tiposDeGastoEnSistema = ViewData["tiposDeGastoEnSistema"] as IEnumerable<TipoDeGasto>;
+    Usuario? usuario = ViewData["usuario"] as Usuario;
+}
+
+<form class="form-pago">
+    <input id="typeOfPayment" name="typeOfPayment" value="unico" type="hidden" />
+
+    <div class="flex-row">
+        <div>
+            <label for="MontoInicial">Monto</label>
+            <input id="MontoInicial" name="MontoInicial" type="number" step="0.01" min="0" required />
+        </div>
+        <div>
+            <label for="Metodo">Método</label>
+            <select id="Metodo" name="Metodo" required>
+                <option value="">-</option>
+                @foreach (MetodoDePago metodoDePago in Enum.GetValues(typeof(MetodoDePago)))
+                {
+                    <option value="@metodoDePago">@metodoDePago</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <label for="TipoGastoId">Tipo de gasto</label>
+    <select id="TipoGastoId" name="TipoGastoId" required>
+        <option value="">Tipo de gasto</option>
+        @foreach (TipoDeGasto tipoDeGasto in tiposDeGastoEnSistema)
+        {
+            <option value="@tipoDeGasto.Id">@tipoDeGasto.Nombre</option>
+        }
+    </select>
+
+
+
+    <label for="Descripcion">Descripción</label>
+    <input id="Descripcion" name="Descripcion" type="text" required />
+
+    <div class="flex-row">
+
+        <div>
+            <label for="FechaDePago">Fecha de pago</label>
+            <input id="FechaDePago" name="FechaDePago" type="date" required />
+        </div>
+
+        <div>
+            <label for="NroRecibo">Nro recibo</label>
+            <input id="NroRecibo" name="NroRecibo" type="text" />
+        </div>
+    </div>
+
+    <button id="submitPagoUnico" type="submit">Agregar</button>
+</form>
+
+
+<style>
+    #MontoInicial {
+        width: 130px;
+    }
+</style>

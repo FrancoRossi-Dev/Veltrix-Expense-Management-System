@@ -1,0 +1,185 @@
+﻿@using Domain.Pagos
+@model IEnumerable<TipoDeGasto>;
+
+@{
+    ViewData["Title"] = "Tipos de gastos";
+    bool ListaVacia = ViewBag.status == "ListaVacia";
+}
+<div class="flex-row">
+    <section>
+        <h2>Crear un nuevo</h2>
+
+        <form id="create-tipoDeGasto" method="post" action="Create">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" name="Nombre" type="text" required />
+
+            <label for="descripcion">Descripcion</label>
+            <input id="descripcion" name="Descripcion" type="text" required />
+
+            <button>Agregar</button>
+        </form>
+    </section>
+    <section class="section-table">
+        @if (!ListaVacia)
+        {
+        <h3>Tipos de gasto registrados</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (TipoDeGasto t in Model)
+                    {
+                        if (t.IsActive)
+                        {
+                            <tr>
+                                <td>@t.Nombre</td>
+                                <td>@t.Descripcion</td>
+                                <td><a asp-action="Edit" asp-controller="TipoDeGasto" asp-route-id="@t.Id"><i class="fa-solid fa-edit"></i> Editar</a></td>
+                                <td><button class="delete-button" data-id="@t.Id"><i class="fa-solid fa-trash"></i> Borrar</button></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No hay gastos cargados en sistema en este momento.</p>
+        }
+    </section>
+</div>
+
+
+@section Scripts {
+    <script type="module">
+        import { addRowToTable, deleteRow, attachDeleteHandler } from '/js/formFunctions.js';
+
+        const form = document.getElementById("create-tipoDeGasto");
+        const modal = document.getElementById("deleteModal");
+        const confirmBtn = document.getElementById("confirmDeleteBtn");
+        const modalMsg = document.getElementById("modalMessage");
+        const cancelBtn = document.getElementById("cancelDeleteBtn");
+        let pendingDeleteAction = null;
+
+
+        confirmBtn.addEventListener("click", async function () {
+            if (pendingDeleteAction) {
+
+                const originalContent = confirmBtn.innerHTML;
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Borrando...';
+
+                await pendingDeleteAction();
+
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalContent;
+                pendingDeleteAction = null;
+            }
+            modal.style.display = "none";
+        });
+
+        cancelBtn.addEventListener("click", function () {
+            modal.style.display = "none";
+            pendingDeleteAction = null;
+        });
+
+
+        document.querySelectorAll('.delete-button').forEach(btn => {
+            attachDeleteHandler(btn, async (button) => {
+                showDeleteConfirmation(() => deleteTipoDeGasto(button.dataset.id, button));
+            });
+        });
+
+        function showDeleteConfirmation(deleteCallback) {
+            modalMsg.textContent = "¿Esta seguro que desea borrar este tipo de gasto?";
+            confirmBtn.textContent = "Borrar";
+            pendingDeleteAction = deleteCallback;
+            modal.style.display = "flex";
+        }
+
+        async function deleteTipoDeGasto(id, btn) {
+            try {
+                const res = await fetch('/TipoDeGasto/Delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(id)
+                });
+                const data = await res.json();
+
+                const originalTag = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Borrando...';
+
+                // realientizado artificial
+                await new Promise(r => setTimeout(r, 500));
+
+                if (data.success) {
+                    toast(data.message, "success");
+                    const row = btn.closest('tr');
+                    deleteRow(row);
+                } else {
+                    toast(data.message, "warning");
+                    btn.disabled = false;
+                    btn.innerHTML = originalTag;
+                }
+            } catch {
+                toast("Error eliminando tipo de gasto.", "warning");
+            }
+        }
+
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"], button:not([type])');
+            const originalContent = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agregando...';
+
+            await new Promise(r => setTimeout(r, 500));
+            try {
+                const formData = new FormData(form);
+                const data = {
+                    Nombre: formData.get('Nombre'),
+                    Descripcion: formData.get('Descripcion')
+                };
+                const res = await fetch('/TipoDeGasto/Create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    toast(result.message, "success");
+                    const tbody = document.querySelector('table tbody');
+                    const newRowHtml = `
+                        <td>${data.Nombre}</td>
+                        <td>${data.Descripcion}</td>
+                        <td><a href="/TipoDeGasto/Edit/${result.id}"><i class="fa-solid fa-edit"></i> Editar</a></td>
+                        <td><button class="delete-button" data-id="${result.id}"><i class="fa-solid fa-trash"></i> Borrar</button></td>
+                    `;
+                    const newRow = addRowToTable(tbody, newRowHtml);
+                    const deleteBtn = newRow.querySelector('.delete-button');
+                    attachDeleteHandler(deleteBtn, async (button) => {
+                        showDeleteConfirmation(() => deleteTipoDeGasto(button.dataset.id, button));
+                    });
+                    form.reset();
+                } else {
+                    toast(result.message, "error");
+                }
+            } catch (err) {
+                toast("Error creando tipo de gasto.", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalContent;
+            }
+        });
+    </script>
+}

@@ -1,0 +1,61 @@
+﻿@{
+    string? roles = Context.Session.GetString("loggedUserRoles");
+}
+
+<div class="sideNav">
+    <header>
+        <img class="logo" src="~/assets/Logo.svg" alt="Logo de Veltrix" />
+        <nav>
+            <ul>
+                <li>
+                    <a id="pagosIndex" asp-area="" asp-controller="Pago" asp-action="Index">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Mis pagos
+                    </a>
+                </li>
+
+
+                @if (roles != null && roles.Contains("Gerente"))
+                {
+                    <li>
+                        <a id="pagosEquipos" asp-area="" asp-controller="Pago" asp-action="Equipo">
+                            <i class="fa-solid fa-users"></i> Pagos del equipo
+                        </a>
+                    </li>
+                    <li>
+                        <a id="tipoDeGastoIndex" asp-area="" asp-controller="TipoDeGasto" asp-action="Index">
+                            <i class="fa-solid fa-rectangle-list"></i> Gestionar tipos de gasto
+                        </a>
+                    </li>
+                }
+                <li>
+                    <a id="usuarioIndex" asp-area="" asp-controller="Usuario" asp-action="Index">
+                        <i class="fa-solid fa-user"></i> Mi perfil
+                    </a>
+                </li>
+            </ul>
+
+            @await Html.PartialAsync("_logoutButton")
+        </nav>
+    </header>
+</div>
+
+
+<script>
+    const currentPath = window.location.pathname.toLowerCase();
+
+    switch(currentPath) {
+        case "/pago/index":
+            document.getElementById("pagosIndex").classList.add("active");
+            break;
+        case "/pago/equipo":
+            document.getElementById("pagosEquipos").classList.add("active");
+            break;
+        case "/tipodegasto/index":
+            document.getElementById("tipoDeGastoIndex").classList.add("active");
+            break;
+        case "/usuario/index":
+            document.getElementById("usuarioIndex").classList.add("active");
+            break;
+        default:
+    }
+</script>

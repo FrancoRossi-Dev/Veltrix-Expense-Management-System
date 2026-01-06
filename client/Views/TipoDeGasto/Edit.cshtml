@@ -1,0 +1,19 @@
+﻿@{
+    @model Domain.Pagos.TipoDeGasto;
+}
+
+<h2>
+    Editando @Model.Id @Model.Nombre
+</h2>
+
+<form action="Edit" method="post">
+    <input type="number" name="Id" value="@Model.Id" readonly hidden />
+
+    <label for="nombre">Nombre</label>
+    <input id="nombre" name="Nombre" value="@Model.Nombre" type="text" />
+
+    <label for="Descripcion">Nombre</label>
+    <textarea id="descripcion" name="Descripcion">@Model.Descripcion</textarea>
+    <p>@ViewBag.msg</p>
+    <button>Actualizar</button>
+</form>

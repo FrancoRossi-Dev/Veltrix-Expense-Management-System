@@ -1,0 +1,31 @@
+﻿@{
+    string? loggedUser = Context.Session.GetString("loggedUser");
+    string? title = ViewData["Title"] as string;
+}
+
+<div class="flex-row view-header">
+
+@if (!string.IsNullOrEmpty(title))
+{
+    <h1>@title</h1>
+}
+
+@if (!string.IsNullOrEmpty(loggedUser))
+{
+    <p class="userTag">@loggedUser</p>
+}
+else
+{
+    <p class="userTag">Usuario desconocido</p>
+}
+
+</div>
+
+
+<style>
+    .view-header {
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--gap-m);
+    }
+</style>

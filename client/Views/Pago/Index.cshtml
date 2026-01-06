@@ -1,0 +1,195 @@
+﻿@using Domain.Pagos
+@model Pago
+
+@{
+    ViewData["Title"] = "Mis Pagos";
+    IEnumerable<Pago> pagosDelMes = ViewBag.pagosDelMes;
+    IEnumerable<TipoDeGasto>? tiposDeGastoEnSistema = ViewData["tiposDeGastoEnSistema"] as IEnumerable<TipoDeGasto>;
+}
+<h1>@ViewBag.msg</h1>
+<div class="flex-row">
+
+    <section>
+        @if (ViewBag.TiposStatus != "ListaVacia")
+        {
+            <div class="PaymentTypeSelector">
+                <label for="paymentSelection">Tipo de pago:</label>
+                <select id="paymentSelection">
+                    <option value="unico">Pago único</option>
+                    <option value="recurrente">Pago recurrente</option>
+                </select>
+            </div>
+
+            <div id="payment-unico">
+                @await Html.PartialAsync("_createFormUnico")
+            </div>
+            <div id="payment-recurrente" style="display:none">
+                @await Html.PartialAsync("_createFormRecurrente")
+            </div>
+        }
+        else
+        {
+            <h4>No hay sistemas de gasto en sistema.</h4>
+        }
+    </section>
+
+    <section class="section-table">
+        @if (ViewBag.ListStatus != "ListaVacia")
+        {
+            @await Html.PartialAsync("_GastoDisplay")
+            <table id="tablaPagos">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Metodo</th>
+                        <th>Monto</th>
+                        <th>Recargo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Pago p in pagosDelMes)
+                    {
+                        <tr>
+                            <td>@p.TipoDePago()</td>
+                            <td>@p.Descripcion</td>
+                            <td>@p.MiFechaDePago()</td>
+                            <td>@p.TipoGasto.Nombre</td>
+                            <td>@p.Metodo</td>
+                            <td>@p.MontoTotal</td>
+                            <td>@p.MiModificador()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        }
+        else
+        {
+            <p>No hay gastos para este mes.</p>
+        }
+    </section>
+
+
+</div>
+
+<style>
+    .PaymentTypeSelector {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 275px;
+    }
+
+        .PaymentTypeSelector label {
+            font-weight: 700 !important;
+        }
+
+        .PaymentTypeSelector select {
+            background-color: var(--color-neutral-900);
+            margin-bottom: 0;
+        }
+</style>
+
+
+@section Scripts {
+    <script type="module">
+        import { addRowToTable } from '/js/formFunctions.js';
+
+        document.querySelectorAll(".form-pago").forEach(form => {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const button = form.querySelector("button");
+
+                button.disabled = true;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Agregando...';
+
+                await new Promise(r => setTimeout(r, 750));
+
+                try {
+                    const res = await fetch("/Pago/Create", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!res.ok) {
+                        toast("Error en la solicitud al servidor", "error");
+                        button.disabled = false;
+                        button.textContent = "Agregar";
+                        return;
+                    }
+
+                    const result = await res.json();
+                    console.log(result);
+                    if (result.state === "error") {
+                        toast("Error al procesar el pago", "error");
+                        button.disabled = false;
+                        button.textContent = "Agregar";
+                        return;
+                    }
+
+                    // Muestra datos de los pagos del usuario para el mes actual. Se muestra para cada pago su tipo (Unico o Recurrente), la descripción, la fecha (fecha de pago para Unicos y fecha de inicio para Recurrentes), el método de pago y el monto con los recargos y descuentos aplicados.
+                    
+                    
+                    toast("Pago procesado correctamente", "success");
+                    const cuotasField = document.querySelector("#cuotas");
+                    const cuotasFieldLabel = document.querySelector("#cuotas-label");
+                    form.reset();
+                    cuotasField.disabled = false;
+                    cuotasField.style.display = 'block';
+                    cuotasFieldLabel.style.display = 'block';
+                    button.disabled = false;
+                    button.textContent = "Agregar";
+
+                    const mesActual = new Date().getMonth() + 1
+                    if (formData.get("FechaDePago")?.split("-")[1] == mesActual || formData.get("PrimerPago")?.split("-")[1] == mesActual){
+                        const tbody = document.querySelector('table tbody');
+                        const newRowHtml = `
+                            <td>${result.tipoDePago}</td>
+                            <td>${result.descripcion}</td>
+                            <td>${result.fechaPago}</td>
+                            <td>${result.tipoDeGasto}</td>
+                            <td>${result.metodo}</td>
+                            <td>${result.montoTotal}</td>
+                            <td>${result.modificador}</td>
+                        `;
+                        addRowToTable(tbody, newRowHtml);
+
+                        const totalField = document.querySelector("#gastoTotal p");
+                        const Voriginal = Number(totalField.textContent.split(" ")[1]);
+                        const montoNuevo = Number(result.montoTotal);
+                        const Vactual = (Voriginal + montoNuevo).toFixed(2);
+                        totalField.textContent = `u$d ${Vactual}`;
+                    }
+                    
+
+                } catch (err) {
+                    console.error("Error enviando el formulario:", err);
+                    toast("Error de conexión o del servidor", "error");
+                    button.disabled = false;
+                    button.textContent = "Agregar";
+                }
+            });
+        });
+
+        // select tipo de pago
+        const paymentUnicoForm = document.getElementById("payment-unico");
+        const paymentRecurrenteForm = document.getElementById("payment-recurrente");
+
+        document.getElementById("paymentSelection").addEventListener("change", (e) => {
+            const value = e.target.value;
+
+            if (value === "recurrente") {
+                paymentUnicoForm.style.display = 'none';
+                paymentRecurrenteForm.style.display = 'block';
+            } else {
+                paymentUnicoForm.style.display = 'block';
+                paymentRecurrenteForm.style.display = 'none';
+            }
+        });
+    </script>
+}

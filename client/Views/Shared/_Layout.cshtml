@@ -1,0 +1,50 @@
+﻿
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Veltrix</title>
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/client.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" /> *@
+
+    <link rel="icon" type="image/x-icon" href="~/favicon.svg" />
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/font-awesome/css/all.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+              integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </environment>
+
+</head>
+<body>
+    @await Html.PartialAsync("_sideNavBar")
+    <div class="content-box">
+        @await Html.PartialAsync("_viewHeader")
+
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button id="cancelDeleteBtn" class="btn btn-cancel">Cancelar</button>
+                <button id="confirmDeleteBtn" class="btn btn-danger"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

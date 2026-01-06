@@ -1,0 +1,86 @@
+﻿@using Domain.Pagos
+@using Domain.Usuarios
+@model IEnumerable<Pago>
+
+@{
+    ViewData["Title"] = "Pagos del equipo";
+    DateTime? fecha = ViewData["fecha"] as DateTime?;
+    string fechaValue = fecha.Value.ToString("yyyy-MM");
+}
+
+<section>
+    <div class="equipoContainer">
+        @await Html.PartialAsync("_GastoDisplay")
+        @if (ViewData["status"] as string == "ListaVacia")
+        {
+            <h4>No hay pagos en este mes.</h4>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Método</th>
+                        <th>Categoría</th>
+                        <th>Descripción</th>
+                        <th>Fecha</th>
+                        <th>Metodo</th>
+                        <th>Monto</th>
+                        <th>Recarga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Pago p in Model)
+                    {
+                        <tr>
+                            <td>@p.Usuario.Nombre</td>
+                            <td>@p.Usuario.Email</td>
+                            <td>@p.TipoDePago()</td>
+                            <td>@p.TipoGasto</td>
+                            <td>@p.Descripcion</td>
+                            <td>@p.MiFechaDePago()</td>
+                            <td>@p.Metodo.ToString()</td>
+                            <td>@p.MontoTotal</td>
+                            <td>@p.MiModificador()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <form id="monthSelector" method="post">
+        <input type="month" name="fecha" value="@fechaValue" />
+    </form>
+</section>
+
+<script>
+    const form = document.querySelector("#monthSelector");
+    const input = form.querySelector("input");
+    input.addEventListener("change", () => {
+        if(input.value) form.submit();
+    })
+</script>
+
+<style>
+    .equipoContainer {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-l);
+    }
+
+    #monthSelector {
+        display: flex;
+        flex-direction: row !important;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+        #monthSelector input {
+            width: fit-content;
+            color-scheme: dark;
+            margin: 0;
+        }
+</style>
