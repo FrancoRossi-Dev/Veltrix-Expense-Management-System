@@ -1,0 +1,35 @@
+﻿@using webApp.DTO
+@model IEnumerable<PagoDto>
+
+<table id="tablaPagos">
+    <thead>
+        <tr>
+            <th>Descripción</th>
+            <th>Categoria</th>
+            <th>Tipo</th>
+            <th>Metodo</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (PagoDto p in Model)
+        {
+            <tr>
+                <td>@p.Descripcion</td>
+                <td>@p.TipoDeGasto</td>
+                <td>@p.TipoDePago</td>
+                <td>@p.FormaDePago</td>
+                <td>@p.FechaDePago</td>
+                <td>@p.MontoTotal</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<style>
+    #tablaPagos tbody {
+        max-height: 50dvh;
+        overflow: hidden;
+    }   
+</style>

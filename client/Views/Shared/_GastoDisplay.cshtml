@@ -1,11 +1,9 @@
-﻿
-@{
-    Decimal? total = ViewData["totalThisMonth"] as Decimal?;
-}
+﻿@using webApp.DTO
+@model MonthExpensesDto
 
 <div id="gastoTotal">
     <h3>Total gastado:</h3>
-    <p>u$d @total</p>
+    <p>u$d <span id="expenses">@Model.Expenses</span> / u$d @Model.MyBudget</p>
 </div>
 
 <style>

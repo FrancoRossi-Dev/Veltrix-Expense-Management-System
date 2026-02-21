@@ -1,17 +1,18 @@
-﻿@using Domain.Pagos
-@using Domain.Usuarios
-@model IEnumerable<Pago>
+﻿@using webApp.DTO
+@using webApp.ViewModels
 
+@model EquipoViewModel
 @{
-    ViewData["Title"] = "Pagos del equipo";
-    DateTime? fecha = ViewData["fecha"] as DateTime?;
-    string fechaValue = fecha.Value.ToString("yyyy-MM");
+    // ViewData["Title"] = "Pagos del equipo";
+    // DateTime? fecha = ViewData["fecha"] as DateTime?;
+    // string fechaValue = fecha.Value.ToString("yyyy-MM");
 }
 
 <section>
     <div class="equipoContainer">
-        @await Html.PartialAsync("_GastoDisplay")
-        @if (ViewData["status"] as string == "ListaVacia")
+        <partial name="_GastoDisplay" model="Model.MonthExpenses" />
+        @* @await Html.PartialAsync("_GastoDisplay") *@
+        @if (@Model.PagosDelEquipo == null)
         {
             <h4>No hay pagos en este mes.</h4>
         }
@@ -28,22 +29,20 @@
                         <th>Fecha</th>
                         <th>Metodo</th>
                         <th>Monto</th>
-                        <th>Recarga</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (Pago p in Model)
+                    @foreach (PagoDto p in Model.PagosDelEquipo)
                     {
                         <tr>
                             <td>@p.Usuario.Nombre</td>
                             <td>@p.Usuario.Email</td>
-                            <td>@p.TipoDePago()</td>
-                            <td>@p.TipoGasto</td>
+                            <td>@p.TipoDePago</td>
+                            <td>@p.TipoDeGasto</td>
                             <td>@p.Descripcion</td>
-                            <td>@p.MiFechaDePago()</td>
-                            <td>@p.Metodo.ToString()</td>
+                            <td>@p.FechaDePago</td>
+                            <td>@p.FormaDePago</td>
                             <td>@p.MontoTotal</td>
-                            <td>@p.MiModificador()</td>
                         </tr>
                     }
                 </tbody>
@@ -52,7 +51,7 @@
     </div>
 
     <form id="monthSelector" method="post">
-        <input type="month" name="fecha" value="@fechaValue" />
+        <input type="month" name="fecha" value="@(Model.Fecha?.ToString("yyyy-MM"))" />
     </form>
 </section>
 

@@ -1,9 +1,7 @@
 ﻿@using Domain.Pagos
 @using Domain.Usuarios
-
+@model PagoViewModel
 @{
-    IEnumerable<TipoDeGasto>? tiposDeGastoEnSistema = ViewData["tiposDeGastoEnSistema"] as IEnumerable<TipoDeGasto>;
-    Usuario? usuario = ViewData["usuario"] as Usuario;
 }
 
 <form class="form-pago">
@@ -29,7 +27,7 @@
     <label for="TipoGastoId">Tipo de gasto</label>
     <select id="TipoGastoId" name="TipoGastoId" required>
         <option value="">Tipo de gasto</option>
-        @foreach (TipoDeGasto tipoDeGasto in tiposDeGastoEnSistema)
+        @foreach (TipoDeGasto tipoDeGasto in Model.TiposDeGastoEnSistema)
         {
             <option value="@tipoDeGasto.Id">@tipoDeGasto.Nombre</option>
         }

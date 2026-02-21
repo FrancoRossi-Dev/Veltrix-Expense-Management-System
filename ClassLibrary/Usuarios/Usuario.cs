@@ -18,8 +18,8 @@ namespace Domain.Usuarios
         public string Contrasenia { get; set; }
         public DateTime FechaIncorporacion { get; set; }
         public string Email { get; set; }
-
         private List<Rol> _rol = new(); 
+
         public void AddRole(Rol r)
         {
             _rol.Add(r);
@@ -64,7 +64,7 @@ namespace Domain.Usuarios
             Validate();
         }
 
-        private decimal CalcPersonalBudget()
+        public decimal CalcPersonalBudget()
         {
             decimal total = Equipo.Budget;
             decimal mod = 0;

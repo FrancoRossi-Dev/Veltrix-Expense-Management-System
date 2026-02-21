@@ -3,18 +3,27 @@
 @using webApp.DTO
 @model IEnumerable<MonthlyTotalDto>;
 
-<div>
+<div class="chartContainer">
     <canvas id="myChart"></canvas>
 </div>
 
+<style>
+    .chartContainer {
+        width: 100%;
+        height: 20dvh;
+        position: relative;
+    }
+
+        .chartContainer canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const chartSourceData = @Html.Raw(
-                JsonSerializer.Serialize(Model)
-        );
-
-    console.log("chartSourceData:", chartSourceData);
-    console.log("first item:", chartSourceData[0]);
+    const chartSourceData = @Html.Raw(JsonSerializer.Serialize(Model));
 
     (function () {
         const canvas = document.getElementById('myChart');
@@ -27,23 +36,36 @@
             labels,
             datasets: [{
                 data: values,
+                tension: 0.3,
+                fill: true,
                 borderColor: '#17E35B',
-                backgroundColor: '#11BF4B',
+                backgroundColor: 'rgba(17,191,75,0.15)',
                 pointRadius: 6,
                 pointHoverRadius: 10
             }]
         };
 
-        new Chart(canvas, {
+        window.expensesChart = new Chart(canvas, {
             type: 'line',
             data,
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     title: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            maxTicksLimit: 5
+                        }
+                    }
                 }
-            }
-        });
+        }
+    });
+   
+
     })();
 </script>

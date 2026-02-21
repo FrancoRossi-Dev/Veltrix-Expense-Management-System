@@ -5,10 +5,9 @@ using Domain.Pagos;
 using Domain.Pagos.tipos;
 using Domain.Usuarios;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using webApp.DTO;
+using webApp.ViewModels;
 
 namespace client.Controllers
 {
@@ -25,19 +24,8 @@ namespace client.Controllers
 
             Usuario u = s.getUserById(id);
 
-            List<TipoDeGasto> tiposDeGastoEnSistema = s.GetTipoDeGastosActivos();
-            if (tiposDeGastoEnSistema.Count == 0) 
-            { 
-                ViewBag.TiposStatus = "ListaVacia"; 
-            } 
-            else 
-            { 
-                ViewData["tiposDeGastoEnSistema"] = tiposDeGastoEnSistema;
-            }
-
             DateTime hoy = DateTime.Now;
             IEnumerable<(string Month, decimal Total)> totalsLastMoths = s.GetTotalsLastMonths(u, hoy);
-            //double totalThisMonth = s.CalcTotalOfMonth(u, hoy);
             var culture = new CultureInfo("es-UY");
 
             IEnumerable<MonthlyTotalDto> monthlyTotals =
@@ -47,57 +35,84 @@ namespace client.Controllers
                     Total = x.Total
                 });
 
-
             Decimal totalThisMonth = monthlyTotals.Last().Total;
-            ViewData["totalThisMonth"] = totalThisMonth;
-            ViewData["totalsLastMonth"] = monthlyTotals;
 
-            List<Pago> pagos = s.GetPagosByUserByMonth(u, hoy);
-            if (pagos.Count == 0) ViewBag.ListStatus = "ListaVacia";
+            IEnumerable<Pago> pagosDelMes = s.GetPagosByUserByMonth(u, hoy);
+            IEnumerable<PagoDto> pagosDelMesDto = pagosDelMes.Select(p => PagoMapper.ToDto(p));
 
-            ViewBag.pagosDelMes = pagos;
-            return View();
+            MonthExpensesDto monthExpensesDto = new();
+            monthExpensesDto.Expenses = totalThisMonth;
+            monthExpensesDto.MyBudget = u.CalcPersonalBudget();
+
+            PagoViewModel pvm = new();
+            pvm.PagosDelMes = pagosDelMesDto;
+            pvm.TiposDeGastoEnSistema = s.GetTipoDeGastosActivos();
+            pvm.TotalsLastMonths = monthlyTotals;
+            pvm.TotalThisMonth = totalThisMonth;
+            pvm.MonthExpenses = monthExpensesDto;
+            return View(pvm);
         }
 
         [UserHasAccessFilter("Gerente")]
         public IActionResult Equipo()
         {
+            EquipoViewModel EquipoVM = new();
+            
             int? id = HttpContext.Session.GetInt32("loggedUserId");
             Usuario gerente = s.getUserById(id);
 
             DateTime hoy = DateTime.Now;
             List<Pago> pagosDelEquipo = s.GetPagosByTeamByMonth(gerente.Equipo.Id, hoy);
 
-            string status = pagosDelEquipo.Count == 0 ? "ListaVacia" : "ok";
-            double TotalEquipo = s.GetTotalPagosByList(pagosDelEquipo);
+            if (pagosDelEquipo.Count == 0)
+            {
+                EquipoVM.PagosDelEquipo = null;
+            }
+            else
+            {
+                IEnumerable<PagoDto> pagosDelEquipoDto = pagosDelEquipo.Select(x => PagoMapper.ToDto(x));
+                EquipoVM.PagosDelEquipo = pagosDelEquipoDto;
+            }
 
-            ViewData["totalThisMonth"] = TotalEquipo;
-            ViewData["status"] = status;
-            ViewData["fecha"] = hoy;
-            return View(pagosDelEquipo);
+            MonthExpensesDto monthExpensesDto = new();
+            monthExpensesDto.Expenses = s.GetTotalPagosByList(pagosDelEquipo);
+            monthExpensesDto.MyBudget = s.CalcTeamBudget(gerente.Equipo.Id);
+
+            EquipoVM.MonthExpenses = monthExpensesDto;
+            return View(EquipoVM);
         }
 
         [HttpPost]
         [UserHasAccessFilter("Gerente")]
         public IActionResult Equipo(DateTime fecha)
         {
+            EquipoViewModel EquipoVM = new();
             int? id = HttpContext.Session.GetInt32("loggedUserId");
             Usuario gerente = s.getUserById(id);
 
             List<Pago> pagosDelEquipo = s.GetPagosByTeamByMonth(gerente.Equipo.Id, fecha);
-            double TotalEquipo = s.GetTotalPagosByList(pagosDelEquipo);
 
-            string status = pagosDelEquipo.Count == 0 ? "ListaVacia" : "ok";
+            if (pagosDelEquipo.Count == 0)
+            {
+                EquipoVM.PagosDelEquipo = null;
+            }
+            else
+            {
+                IEnumerable<PagoDto> pagosDelEquipoDto = pagosDelEquipo.Select(x => PagoMapper.ToDto(x));
+                EquipoVM.PagosDelEquipo = pagosDelEquipoDto;
+            }
 
-            ViewData["totalThisMonth"] = TotalEquipo;
-            ViewData["status"] = status;
-            ViewData["fecha"] = fecha;
-            return View(pagosDelEquipo);
+            MonthExpensesDto monthExpensesDto = new();
+            monthExpensesDto.Expenses = s.GetTotalPagosByList(pagosDelEquipo);
+            monthExpensesDto.MyBudget = s.CalcTeamBudget(gerente.Equipo.Id);
+            EquipoVM.MonthExpenses = monthExpensesDto;
+
+            return View(EquipoVM);
         }
 
         [HttpPost]
         [UserHasAccessFilter("Empleado")]
-        public IActionResult Create(string typeOfPayment, double MontoInicial, int TipoGastoId, MetodoDePago Metodo, string Descripcion, DateTime FechaDePago, string NroRecibo, DateTime PrimerPago, bool esIndefinida, int cuotas)
+        public IActionResult Create(string typeOfPayment, decimal MontoInicial, int TipoGastoId, MetodoDePago Metodo, string Descripcion, DateTime FechaDePago, string NroRecibo, DateTime PrimerPago, int cuotas)
         {
             TipoDeGasto TipoGasto = s.FindTipoDeGastoById(TipoGastoId);
 
@@ -120,26 +135,22 @@ namespace client.Controllers
                     return CreateUnico(u);
                 }
 
-                if (typeOfPayment == "recurrente")
+                if (typeOfPayment == "subscripcion")
                 {
-                    if (esIndefinida)
-                    {
-                        Recurrente r = new(MontoInicial, Metodo, TipoGasto, usuario, Descripcion, PrimerPago);
-                        return CreateRecurrente(r);
-                    }
-                    else
-                    {
-                        DateTime UltimoPago = PrimerPago.AddMonths(cuotas);
-                        Console.WriteLine(UltimoPago);
-                        Recurrente r = new(MontoInicial, Metodo, TipoGasto, usuario, Descripcion, PrimerPago, UltimoPago);
-                        return CreateRecurrente(r);
-                    }
+                    Subscripcion sub = new(MontoInicial, Metodo, TipoGasto, usuario, Descripcion, PrimerPago);
+                    return CreateSubscription(sub);
+                }
+
+                if (typeOfPayment == "cuotas")
+                {
+                    DateTime UltimoPago = PrimerPago.AddMonths(cuotas);
+                    Console.WriteLine(UltimoPago);
+                    Cuotas c = new(MontoInicial, Metodo, TipoGasto, usuario, Descripcion, PrimerPago, UltimoPago);
+                    return CreateCuotas(c);
                 }
             }
             catch (Exception ex)
             {
-
-
                 return Json(new
                 {
                     state = "error",
@@ -147,14 +158,12 @@ namespace client.Controllers
                 });
             }
 
-
             return Json(new
             {
                 state = "error",
                 msg = "Tipo de pago desconocido"
             });
         }
-
 
         private IActionResult CreateUnico(Unico u)
         {
@@ -186,26 +195,54 @@ namespace client.Controllers
             }
         }
 
-
-        private IActionResult CreateRecurrente(Recurrente r)
+        private IActionResult CreateCuotas(Cuotas c)
         {
 
-            if (r != null)
+            if (c != null)
             {
-                r.Validate();
-                s.AltaPago(r);
+                c.Validate();
+                s.AltaPago(c);
 
                 return Json(new
                 {
-                    TipoDePago = r.TipoDePago(),
-                    Descripcion = r.Descripcion,
-                    FechaPago = r.MiFechaDePago(),
-                    TipoDeGasto = r.TipoGasto.Nombre,
-                    Metodo = r.Metodo.ToString(),
-                    MontoTotal = r.MontoTotal,
-                    Modificador = r.MiModificador(),
+                    TipoDePago = c.TipoDePago(),
+                    Descripcion = c.Descripcion,
+                    FechaPago = c.MiFechaDePago(),
+                    TipoDeGasto = c.TipoGasto.Nombre,
+                    Metodo = c.Metodo.ToString(),
+                    MontoTotal = c.MontoTotal,
+                    Modificador = c.MiModificador(),
                     state = "exito",
-                    msg = "Pago creado con exito"
+                    msg = "Pago en cuotas ingresado con exito"
+                });
+            }
+
+            return Json(new
+            {
+                state = "error",
+                msg = "Error en el controlador"
+            });
+        }
+
+        private IActionResult CreateSubscription(Subscripcion sub)
+        {
+
+            if (sub != null)
+            {
+                sub.Validate();
+                s.AltaPago(sub);
+
+                return Json(new
+                {
+                    TipoDePago = sub.TipoDePago(),
+                    Descripcion = sub.Descripcion,
+                    FechaPago = sub.MiFechaDePago(),
+                    TipoDeGasto = sub.TipoGasto.Nombre,
+                    Metodo = sub.Metodo.ToString(),
+                    MontoTotal = sub.MontoTotal,
+                    Modificador = sub.MiModificador(),
+                    state = "exito",
+                    msg = "Subscripcion ingresada con exito"
                 });
             }
 

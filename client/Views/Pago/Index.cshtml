@@ -5,29 +5,30 @@
 
 @{
     ViewData["Title"] = "Mis Pagos";
-    IEnumerable<Pago> pagosDelMes = ViewBag.pagosDelMes;
-    IEnumerable<TipoDeGasto>? tiposDeGastoEnSistema = ViewData["tiposDeGastoEnSistema"] as IEnumerable<TipoDeGasto>;
-    IEnumerable<MonthlyTotalDto>? totalsLastMonth = ViewData["totalsLastMonth"] as IEnumerable<MonthlyTotalDto>;
 }
-<h1>@ViewBag.msg</h1>
 <div class="flex-row">
 
     <section>
-        @if (ViewBag.TiposStatus != "ListaVacia")
+        @if (Model.TiposDeGastoEnSistema != null)
         {
             <div class="PaymentTypeSelector">
                 <label for="paymentSelection">Tipo de pago:</label>
                 <select id="paymentSelection">
                     <option value="unico">Pago único</option>
-                    <option value="recurrente">Pago recurrente</option>
+                    <option value="cuotas">Pago en cuotas</option>
+                    <option value="subscripcion">Pago subscipcion</option>
                 </select>
             </div>
 
             <div id="payment-unico">
-                @await Html.PartialAsync("_createFormUnico")
+                <partial name="components/_createFormUnico" />
             </div>
-            <div id="payment-recurrente" style="display:none">
-                @await Html.PartialAsync("_createFormRecurrente")
+            <div id="payment-cuotas" style="display:none">
+                <partial name="components/_createFormCuotas" />
+            </div>
+
+            <div id="payment-subscripcion" style="display:none">
+                <partial name="components/_createFormSubscripcion" />
             </div>
         }
         else
@@ -37,46 +38,16 @@
     </section>
 
     <section class="section-table">
-        @if (ViewBag.ListStatus != "ListaVacia")
+        <partial name="components/_expensesChart" model="Model.TotalsLastMonths" />
+        @if (Model.PagosDelMes != null)
         {
-            @await Html.PartialAsync("_GastoDisplay")
-            <table id="tablaPagos">
-                <thead>
-                    <tr>
-                        <th>Tipo</th>
-                        <th>Descripción</th>
-                        <th>Fecha</th>
-                        <th>Tipo</th>
-                        <th>Metodo</th>
-                        <th>Monto</th>
-                        <th>Recargo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (Pago p in pagosDelMes)
-                    {
-                        <tr>
-                            <td>@p.TipoDePago()</td>
-                            <td>@p.Descripcion</td>
-                            <td>@p.MiFechaDePago()</td>
-                            <td>@p.TipoGasto.Nombre</td>
-                            <td>@p.Metodo</td>
-                            <td>@p.MontoTotal</td>
-                            <td>@p.MiModificador()</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
+            <partial name="_GastoDisplay" model="Model.MonthExpenses" />
+            <partial name="components/_gastoTable" model="Model.PagosDelMes" />
         }
         else
         {
             <p>No hay gastos para este mes.</p>
         }
-        @await Html.PartialAsync("_expensesChart", totalsLastMonth)
-
-
-
     </section>
 
 
@@ -88,7 +59,7 @@
 
     <script type="module">
         import { addRowToTable } from '/js/formFunctions.js';
-
+        console.log(document.querySelectorAll(".form-pago").length);
         document.querySelectorAll(".form-pago").forEach(form => {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -115,23 +86,16 @@
                     }
 
                     const result = await res.json();
-                    console.log(result);
                     if (result.state === "error") {
                         toast("Error al procesar el pago", "error");
                         button.disabled = false;
                         button.textContent = "Agregar";
                         return;
                     }
-
-
-
+                    console.log(result);
                     toast("Pago procesado correctamente", "success");
-                    const cuotasField = document.querySelector("#cuotas");
-                    const cuotasFieldLabel = document.querySelector("#cuotas-label");
+
                     form.reset();
-                    cuotasField.disabled = false;
-                    cuotasField.style.display = 'block';
-                    cuotasFieldLabel.style.display = 'block';
                     button.disabled = false;
                     button.textContent = "Agregar";
 
@@ -139,21 +103,38 @@
                     if (formData.get("FechaDePago")?.split("-")[1] == mesActual || formData.get("PrimerPago")?.split("-")[1] == mesActual){
                         const tbody = document.querySelector('table tbody');
                         const newRowHtml = `
-                            <td>${result.tipoDePago}</td>
                             <td>${result.descripcion}</td>
-                            <td>${result.fechaPago}</td>
                             <td>${result.tipoDeGasto}</td>
+                            <td>${result.tipoDePago}</td>
                             <td>${result.metodo}</td>
+                            <td>${result.fechaPago}</td>
                             <td>${result.montoTotal}</td>
-                            <td>${result.modificador}</td>
                         `;
                         addRowToTable(tbody, newRowHtml);
 
-                        const totalField = document.querySelector("#gastoTotal p");
-                        const Voriginal = Number(totalField.textContent.split(" ")[1]);
+                        // Update total
+                        const totalField = document.querySelector("#expenses");
+                        const Voriginal = Number(totalField.textContent);
                         const montoNuevo = Number(result.montoTotal);
                         const Vactual = (Voriginal + montoNuevo).toFixed(2);
-                        totalField.textContent = `u$d ${Vactual}`;
+                        totalField.textContent = Vactual;
+
+                        // Update chart
+                        if (window.expensesChart && result.fechaPago) {
+                            const fecha = new Date(result.fechaPago);
+                            const mesNumero = fecha.getMonth();
+
+                            const meses = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "set.", "oct.", "nov.", "dic."];
+                            const mesLabel = meses[mesNumero];
+
+                            const chart = window.expensesChart;
+                            const index = chart.data.labels.indexOf(mesLabel);
+
+                            if (index !== -1) {
+                                chart.data.datasets[0].data[index] += Number(result.montoTotal);
+                                chart.update();
+                            }
+                        }
                     }
 
 
@@ -167,19 +148,28 @@
         });
 
         // select tipo de pago
-        const paymentUnicoForm = document.getElementById("payment-unico");
-        const paymentRecurrenteForm = document.getElementById("payment-recurrente");
+           const paymentUnicoForm = document.getElementById("payment-unico");
+           const paymentCuotasForm = document.getElementById("payment-cuotas");
+           const paymentSubscripcionForm = document.getElementById("payment-subscripcion");
 
-        document.getElementById("paymentSelection").addEventListener("change", (e) => {
-            const value = e.target.value;
+           const formsMap = {
+               unico: paymentUnicoForm,
+               cuotas: paymentCuotasForm,
+               subscripcion: paymentSubscripcionForm
+           };
 
-            if (value === "recurrente") {
-                paymentUnicoForm.style.display = 'none';
-                paymentRecurrenteForm.style.display = 'block';
-            } else {
-                paymentUnicoForm.style.display = 'block';
-                paymentRecurrenteForm.style.display = 'none';
-            }
-        });
+           document.getElementById("paymentSelection").addEventListener("change", (e) => {
+               const value = e.target.value;
+
+               // Hide all
+               Object.values(formsMap).forEach(form => {
+                   if (form) form.style.display = "none";
+               });
+
+               // Show selected
+               if (formsMap[value]) {
+                   formsMap[value].style.display = "block";
+               }
+           });
     </script>
 }

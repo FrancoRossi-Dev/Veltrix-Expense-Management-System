@@ -481,5 +481,19 @@ namespace Domain
 
             return false;
         }
+
+        public decimal CalcTeamBudget(int id)
+        {
+            decimal budget = 0;
+            foreach(Usuario u in _usuarios)
+            {
+                if (u.Id == id)
+                {
+                budget += u.CalcPersonalBudget();
+                }
+            }
+
+            return budget;
+        }
     }
 }
