@@ -12,6 +12,7 @@ namespace Domain.Usuarios.Roles
         public RolGerente() : base()
         {
             Titulo = "Gerente";
+            BudgetMod = 10m;
         }
 
     }

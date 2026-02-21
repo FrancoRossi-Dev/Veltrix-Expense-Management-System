@@ -1,9 +1,11 @@
 ﻿using Domain.Pagos;
+using Domain.Pagos.tipos;
 using Domain.Usuarios;
 using Domain.Usuarios.Roles;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -158,14 +160,14 @@ namespace Domain
         {
             List<Equipo> PRECARGA_EQUIPOS = new()
             {
-                new("Desarrollo Backend"),
-                new("Desarrollo Frontend - Web"),
-                new("Desarrollo Frontend - Mobile"),
-                new("DevOps & Infrastructure"),
-                new("QA & Testing"),
-                new("UX/UI Design"),
-                new("Product Management"),
-                new("Data Science & Analytics")
+                new("Desarrollo Backend", 1000m),
+                new("Desarrollo Frontend - Web", 750m),
+                new("Desarrollo Frontend - Mobile", 750m),
+                new("DevOps & Infrastructure", 500m),
+                new("QA & Testing", 700m),
+                new("UX/UI Design", 500m),
+                new("Product Management", 1000m),
+                new("Data Science & Analytics", 750m)
             };
             PRECARGA_EQUIPOS.ForEach(AltaEquipo);
         }
@@ -206,7 +208,6 @@ namespace Domain
                 {
                     u.AddRole(_roles[0]);
                 }
-                // TODO definir si los gerentes tambien son empleados!
                 u.AddRole(_roles[1]);
 
             }
@@ -233,70 +234,70 @@ namespace Domain
         private void PrecargaPagos()
         {
             // 15 Pagos recurrentes activos (suscripciones sin fecha fin) - muchos iniciados en noviembre 2025
-            List<Recurrente> PRECARGA_SUBSCRIPCIONES = new()
-    {
-        new(299, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[1], "GitHub Enterprise", new DateTime(2025, 11, 01)),
-        new(450, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[3], "AWS Cloud Services", new DateTime(2025, 11, 05)),
-        new(89, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[5], "Figma Professional", new DateTime(2025, 11, 10)),
-        new(199, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[7], "Jira Software Premium", new DateTime(2025, 11, 15)),
-        new(75, MetodoDePago.DEBITO, _tiposDeGastos[0], _usuarios[2], "Slack Business+", new DateTime(2025, 11, 08)),
-        new(350, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[4], "Azure DevOps Services", new DateTime(2025, 11, 12)),
-        new(120, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[0], "Notion Team Plan", new DateTime(2025, 11, 03)),
-        new(189, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[8], "Adobe Creative Cloud", new DateTime(2025, 10, 20)),
-        new(95, MetodoDePago.DEBITO, _tiposDeGastos[0], _usuarios[10], "Postman Enterprise", new DateTime(2025, 10, 15)),
-        new(249, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[12], "MongoDB Atlas", new DateTime(2025, 09, 30)),
-        new(159, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[0], "Zoom Business", new DateTime(2025, 11, 18)),
-        new(299, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[16], "Google Cloud Platform", new DateTime(2025, 11, 22)),
-        new(79, MetodoDePago.DEBITO, _tiposDeGastos[0], _usuarios[18], "Miro Team", new DateTime(2025, 11, 07)),
-        new(199, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[11], "Confluence Enterprise", new DateTime(2025, 10, 10)),
-        new(449, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[0], "Vercel Pro Team", new DateTime(2025, 11, 20))
-    };
+            List<Subscripcion> PRECARGA_SUBSCRIPCIONES = new()
+                    {
+                        new(299, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[1], "GitHub Enterprise", new DateTime(2025, 11, 01)),
+                        new(450, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[3], "AWS Cloud Services", new DateTime(2025, 11, 05)),
+                        new(89, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[5], "Figma Professional", new DateTime(2025, 11, 10)),
+                        new(199, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[7], "Jira Software Premium", new DateTime(2025, 11, 15)),
+                        new(75, MetodoDePago.DEBITO, _tiposDeGastos[0], _usuarios[2], "Slack Business+", new DateTime(2025, 11, 08)),
+                        new(350, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[4], "Azure DevOps Services", new DateTime(2025, 11, 12)),
+                        new(120, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[0], "Notion Team Plan", new DateTime(2025, 11, 03)),
+                        new(189, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[8], "Adobe Creative Cloud", new DateTime(2025, 10, 20)),
+                        new(95, MetodoDePago.DEBITO, _tiposDeGastos[0], _usuarios[10], "Postman Enterprise", new DateTime(2025, 10, 15)),
+                        new(249, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[12], "MongoDB Atlas", new DateTime(2025, 09, 30)),
+                        new(159, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[0], "Zoom Business", new DateTime(2025, 11, 18)),
+                        new(299, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[16], "Google Cloud Platform", new DateTime(2025, 11, 22)),
+                        new(79, MetodoDePago.DEBITO, _tiposDeGastos[0], _usuarios[18], "Miro Team", new DateTime(2025, 11, 07)),
+                        new(199, MetodoDePago.CREDITO, _tiposDeGastos[0], _usuarios[11], "Confluence Enterprise", new DateTime(2025, 10, 10)),
+                        new(449, MetodoDePago.CREDITO, _tiposDeGastos[2], _usuarios[0], "Vercel Pro Team", new DateTime(2025, 11, 20))
+                    };
             PRECARGA_SUBSCRIPCIONES.ForEach(AltaPago);
 
             // 10 Pagos en cuotas (5 finalizados, 5 incompletos)
-            List<Recurrente> PRECARGA_CUOTAS = new()
-    {
-        // 5 Cuotas finalizadas (fecha fin pasada - finalizadas antes de nov 2025)
-        new(275, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[8], "Dell XPS 15 - 8 cuotas", new DateTime(2024, 05, 15), new DateTime(2024, 12, 15)),
-        new(148, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[14], "Monitor LG UltraWide - 8 cuotas", new DateTime(2024, 06, 20), new DateTime(2025, 01, 20)),
-        new(200, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[9], "Certificación Google Cloud - 7 cuotas", new DateTime(2024, 07, 10), new DateTime(2025, 02, 10)),
-        new(200, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[15], "iMac 24 pulgadas - 14 cuotas", new DateTime(2024, 01, 20), new DateTime(2025, 02, 20)),
-        new(150, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[20], "Silla ergonómica Herman Miller - 7 cuotas", new DateTime(2024, 12, 15), new DateTime(2025, 06, 15)),
-        // 5 Cuotas incompletas (fecha fin en futuro - 2026/2027)
-        new(118, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[1], "MacBook Pro M4 - 13 cuotas", new DateTime(2025, 11, 10), new DateTime(2026, 11, 10)),
-        new(177, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[5], "Curso AWS Solutions Architect - 7 cuotas", new DateTime(2025, 11, 05), new DateTime(2026, 05, 05)),
-        new(105, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[19], "Laptop Lenovo ThinkPad - 13 cuotas", new DateTime(2025, 09, 25), new DateTime(2026, 09, 25)),
-        new(150, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[11], "Workstation Dell Precision - 19 cuotas", new DateTime(2025, 05, 01), new DateTime(2026, 11, 01)),
-        new(100, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[0], "Máster en Data Science - 13 cuotas", new DateTime(2025, 10, 01), new DateTime(2026, 10, 01))
-    };
+            List<Cuotas> PRECARGA_CUOTAS = new()
+                    {
+                        // 5 Cuotas finalizadas (fecha fin pasada - finalizadas antes de nov 2025)
+                        new(275, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[8], "Dell XPS 15 - 8 cuotas", new DateTime(2024, 05, 15), new DateTime(2024, 12, 15)),
+                        new(148, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[14], "Monitor LG UltraWide - 8 cuotas", new DateTime(2024, 06, 20), new DateTime(2025, 01, 20)),
+                        new(200, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[9], "Certificación Google Cloud - 7 cuotas", new DateTime(2024, 07, 10), new DateTime(2025, 02, 10)),
+                        new(200, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[15], "iMac 24 pulgadas - 14 cuotas", new DateTime(2024, 01, 20), new DateTime(2025, 02, 20)),
+                        new(150, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[20], "Silla ergonómica Herman Miller - 7 cuotas", new DateTime(2024, 12, 15), new DateTime(2025, 06, 15)),
+                        // 5 Cuotas incompletas (fecha fin en futuro - 2026/2027)
+                        new(118, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[1], "MacBook Pro M4 - 13 cuotas", new DateTime(2025, 11, 10), new DateTime(2026, 11, 10)),
+                        new(177, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[5], "Curso AWS Solutions Architect - 7 cuotas", new DateTime(2025, 11, 05), new DateTime(2026, 05, 05)),
+                        new(105, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[19], "Laptop Lenovo ThinkPad - 13 cuotas", new DateTime(2025, 09, 25), new DateTime(2026, 09, 25)),
+                        new(150, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[11], "Workstation Dell Precision - 19 cuotas", new DateTime(2025, 05, 01), new DateTime(2026, 11, 01)),
+                        new(100, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[0], "Máster en Data Science - 13 cuotas", new DateTime(2025, 10, 01), new DateTime(2026, 10, 01))
+                    };
             PRECARGA_CUOTAS.ForEach(AltaPago);
 
             // 20 Pagos únicos - muchos en noviembre 2025
             List<Unico> PRECARGA_PAGOS_UNICOS = new()
-    {
-        // Pagos de noviembre 2025
-        new(4800, MetodoDePago.CREDITO, _tiposDeGastos[5], _usuarios[3], "Conferencia AWS re:Invent - Las Vegas", new DateTime(2025, 11, 02), "REC-2025-001578"),
-        new(195, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[7], "After office equipo Backend", new DateTime(2025, 11, 04), "REC-2025-002341"),
-        new(280, MetodoDePago.DEBITO, _tiposDeGastos[4], _usuarios[2], "Uber para visita cliente", new DateTime(2025, 11, 06), "REC-2025-003156"),
-        new(920, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[11], "Certificación Scrum Master", new DateTime(2025, 11, 08), "REC-2025-000892"),
-        new(350, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[6], "Cena team building QA", new DateTime(2025, 11, 11), "REC-2025-004267"),
-        new(1350, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[15], "Teclado mecánico Keychron Q6", new DateTime(2025, 11, 13), "REC-2025-000543"),
-        new(105, MetodoDePago.DEBITO, _tiposDeGastos[4], _usuarios[9], "Taxi aeropuerto - reunión clientes", new DateTime(2025, 11, 16), "REC-2025-004789"),
-        new(3200, MetodoDePago.CREDITO, _tiposDeGastos[5], _usuarios[4], "Google Cloud Next", new DateTime(2025, 11, 18), "REC-2025-001823"),
-        new(480, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[12], "Actividad escape room equipo", new DateTime(2025, 11, 19), "REC-2025-003654"),
-        new(750, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[18], "Curso Figma Advanced", new DateTime(2025, 11, 21), "REC-2025-002198"),
-        new(165, MetodoDePago.DEBITO, _tiposDeGastos[7], _usuarios[10], "Resma papel y útiles oficina", new DateTime(2025, 11, 23), "REC-2025-004102"),
-        new(3800, MetodoDePago.CREDITO, _tiposDeGastos[5], _usuarios[16], "React Advanced London", new DateTime(2025, 11, 24), "REC-2025-002176"),
-        new(240, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[13], "Pizza party release v3.0", new DateTime(2025, 11, 23), "REC-2025-005023"),
-        new(1580, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[20], "Mouse Logitech MX Master 3S", new DateTime(2025, 11, 25), "REC-2025-001234"),
-        new(420, MetodoDePago.DEBITO, _tiposDeGastos[4], _usuarios[17], "Combustible viaje presentación", new DateTime(2025, 11, 25), "REC-2025-004512"),
-        // Pagos de meses anteriores (2025)
-        new(105, MetodoDePago.EFECTIVO, _tiposDeGastos[4], _usuarios[21], "Estacionamiento evento networking", new DateTime(2025, 10, 07), "REC-2025-004834"),
-        new(620, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[14], "Workshop Docker y Kubernetes", new DateTime(2025, 10, 16), "REC-2025-003421"),
-        new(520, MetodoDePago.CREDITO, _tiposDeGastos[8], _usuarios[5], "Campaña Google Ads Q4", new DateTime(2025, 10, 01), "REC-2025-005234"),
-        new(980, MetodoDePago.CREDITO, _tiposDeGastos[9], _usuarios[0], "Consultoría legal contratos", new DateTime(2025, 09, 15), "REC-2025-004567"),
-        new(295, MetodoDePago.DEBITO, _tiposDeGastos[7], _usuarios[19], "Café y snacks para oficina", new DateTime(2025, 10, 20), "REC-2025-005678")
-    };
+                {
+                    // Pagos de noviembre 2025
+                    new(4800, MetodoDePago.CREDITO, _tiposDeGastos[5], _usuarios[3], "Conferencia AWS re:Invent - Las Vegas", new DateTime(2025, 11, 02), "REC-2025-001578"),
+                    new(195, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[7], "After office equipo Backend", new DateTime(2025, 11, 04), "REC-2025-002341"),
+                    new(280, MetodoDePago.DEBITO, _tiposDeGastos[4], _usuarios[2], "Uber para visita cliente", new DateTime(2025, 11, 06), "REC-2025-003156"),
+                    new(920, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[11], "Certificación Scrum Master", new DateTime(2025, 11, 08), "REC-2025-000892"),
+                    new(350, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[6], "Cena team building QA", new DateTime(2025, 11, 11), "REC-2025-004267"),
+                    new(1350, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[15], "Teclado mecánico Keychron Q6", new DateTime(2025, 11, 13), "REC-2025-000543"),
+                    new(105, MetodoDePago.DEBITO, _tiposDeGastos[4], _usuarios[9], "Taxi aeropuerto - reunión clientes", new DateTime(2025, 11, 16), "REC-2025-004789"),
+                    new(3200, MetodoDePago.CREDITO, _tiposDeGastos[5], _usuarios[4], "Google Cloud Next", new DateTime(2025, 11, 18), "REC-2025-001823"),
+                    new(480, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[12], "Actividad escape room equipo", new DateTime(2025, 11, 19), "REC-2025-003654"),
+                    new(750, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[18], "Curso Figma Advanced", new DateTime(2025, 11, 21), "REC-2025-002198"),
+                    new(165, MetodoDePago.DEBITO, _tiposDeGastos[7], _usuarios[10], "Resma papel y útiles oficina", new DateTime(2025, 11, 23), "REC-2025-004102"),
+                    new(3800, MetodoDePago.CREDITO, _tiposDeGastos[5], _usuarios[16], "React Advanced London", new DateTime(2025, 11, 24), "REC-2025-002176"),
+                    new(240, MetodoDePago.EFECTIVO, _tiposDeGastos[6], _usuarios[13], "Pizza party release v3.0", new DateTime(2025, 11, 23), "REC-2025-005023"),
+                    new(1580, MetodoDePago.CREDITO, _tiposDeGastos[1], _usuarios[20], "Mouse Logitech MX Master 3S", new DateTime(2025, 11, 25), "REC-2025-001234"),
+                    new(420, MetodoDePago.DEBITO, _tiposDeGastos[4], _usuarios[17], "Combustible viaje presentación", new DateTime(2025, 11, 25), "REC-2025-004512"),
+                    // Pagos de meses anteriores (2025)
+                    new(105, MetodoDePago.EFECTIVO, _tiposDeGastos[4], _usuarios[21], "Estacionamiento evento networking", new DateTime(2025, 10, 07), "REC-2025-004834"),
+                    new(620, MetodoDePago.CREDITO, _tiposDeGastos[3], _usuarios[14], "Workshop Docker y Kubernetes", new DateTime(2025, 10, 16), "REC-2025-003421"),
+                    new(520, MetodoDePago.CREDITO, _tiposDeGastos[8], _usuarios[5], "Campaña Google Ads Q4", new DateTime(2025, 10, 01), "REC-2025-005234"),
+                    new(980, MetodoDePago.CREDITO, _tiposDeGastos[9], _usuarios[0], "Consultoría legal contratos", new DateTime(2025, 09, 15), "REC-2025-004567"),
+                    new(295, MetodoDePago.DEBITO, _tiposDeGastos[7], _usuarios[19], "Café y snacks para oficina", new DateTime(2025, 10, 20), "REC-2025-005678")
+                };
             PRECARGA_PAGOS_UNICOS.ForEach(AltaPago);
         }
 
@@ -324,7 +325,7 @@ namespace Domain
             return usuariosDelEquipo;
         }
 
-        public Usuario FindUserByMail(string inputMail)
+        public Usuario? FindUserByMail(string inputMail)
         {
             Usuario? match = null;
 
@@ -344,7 +345,7 @@ namespace Domain
             if (String.IsNullOrEmpty(userMail) || String.IsNullOrEmpty(password))
                 throw new Exception("Complete ambos campos");
 
-            Usuario u = FindUserByMail(userMail);
+            Usuario? u = FindUserByMail(userMail);
 
             if (u == null || u.Contrasenia != password)
                 throw new Exception("Credenciales incorrectas");
@@ -425,9 +426,9 @@ namespace Domain
             return match;
         }
 
-        public double GetTotalPagosByList(IEnumerable<Pago> pagos)
+        public decimal GetTotalPagosByList(IEnumerable<Pago> pagos)
         {
-            double total = 0;
+            decimal total = 0;
             foreach (Pago p in pagos)
             {
                 total += p.MontoTotal;
@@ -435,32 +436,49 @@ namespace Domain
             return total;
         }
 
-        public double CalcTotalOfMonth(Usuario user, DateTime fecha)
+        public decimal CalcTotalOfMonth(Usuario user, DateTime fecha)
         {
-            double total = 0;
+            decimal total = 0;
 
             List<Pago> pagosEsteMes = GetPagosByUserByMonth(user, fecha);
             foreach (Pago p in pagosEsteMes)
             {
                 total += p.MontoTotal;
             }
-            return total;
-
+            return (decimal)total;
         }
+
+
+        public IEnumerable<(string Month, decimal Total)> GetTotalsLastMonths(
+            Usuario user,
+            DateTime date)
+        {
+            var culture = new CultureInfo("es-UY");
+            var start = new DateTime(date.Year, date.Month, 1);
+
+            for (int i = 5; i >= 0; i--)
+            {
+                var monthDate = start.AddMonths(-i);
+
+                yield return (
+                    monthDate.ToString("MMM", culture).ToLower(),
+                    CalcTotalOfMonth(user, monthDate)
+                );
+            }
+        }
+
 
         public bool TipoDeGastoInUse(TipoDeGasto tipo)
         {
-            // Un gasto en uso es aquel que contenga una compra recurrente no finalizada, se entiende que el resto de los pagos son historicos
             foreach (Pago p in _pagos)
             {
-                if (p.TipoDePago() == "Recurrente")
-                {
-                    Recurrente? r = p as Recurrente;
-                    if (r?.TipoGasto.Id == tipo.Id && (r.EsIndefinida || r.UltimoPago >= DateTime.Now))
-                        return true;
+                if (p is Subscripcion s && s.TipoGasto.Id == tipo.Id && s.IsActive)
+                    return true;
 
-                }
+                if (p is Cuotas c && c.TipoGasto.Id == tipo.Id && c.IsActive)
+                    return true;
             }
+
             return false;
         }
     }

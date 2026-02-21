@@ -2,9 +2,13 @@
 using client.Filters;
 using Domain;
 using Domain.Pagos;
+using Domain.Pagos.tipos;
 using Domain.Usuarios;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using webApp.DTO;
 
 namespace client.Controllers
 {
@@ -32,8 +36,21 @@ namespace client.Controllers
             }
 
             DateTime hoy = DateTime.Now;
-            double totalThisMonth = s.CalcTotalOfMonth(u, hoy);
+            IEnumerable<(string Month, decimal Total)> totalsLastMoths = s.GetTotalsLastMonths(u, hoy);
+            //double totalThisMonth = s.CalcTotalOfMonth(u, hoy);
+            var culture = new CultureInfo("es-UY");
+
+            IEnumerable<MonthlyTotalDto> monthlyTotals =
+                totalsLastMoths.Select(x => new MonthlyTotalDto
+                {
+                    Month = x.Month,
+                    Total = x.Total
+                });
+
+
+            Decimal totalThisMonth = monthlyTotals.Last().Total;
             ViewData["totalThisMonth"] = totalThisMonth;
+            ViewData["totalsLastMonth"] = monthlyTotals;
 
             List<Pago> pagos = s.GetPagosByUserByMonth(u, hoy);
             if (pagos.Count == 0) ViewBag.ListStatus = "ListaVacia";

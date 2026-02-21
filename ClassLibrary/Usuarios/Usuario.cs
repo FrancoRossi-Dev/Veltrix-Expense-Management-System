@@ -19,7 +19,7 @@ namespace Domain.Usuarios
         public DateTime FechaIncorporacion { get; set; }
         public string Email { get; set; }
 
-        private List<Rol> _rol = new List<Rol>(); 
+        private List<Rol> _rol = new(); 
         public void AddRole(Rol r)
         {
             _rol.Add(r);
@@ -46,7 +46,7 @@ namespace Domain.Usuarios
             return "Desconocido";
         }
 
-        public static string Dominio { get; set; } = "@laEmpresa.com";
+        public static string Dominio { get; set; } = "@veltrix.com";
         
         public Usuario()
         {
@@ -64,6 +64,18 @@ namespace Domain.Usuarios
             Validate();
         }
 
+        private decimal CalcPersonalBudget()
+        {
+            decimal total = Equipo.Budget;
+            decimal mod = 0;
+            foreach(Rol rol in _rol)
+            {
+                mod += rol.BudgetMod;
+            }
+            total *= mod;
+            return total;
+        }
+
         private string CapitalizeNames(string texto)
         {
             if (string.IsNullOrEmpty(texto)) return texto;
@@ -74,9 +86,7 @@ namespace Domain.Usuarios
         
         public void GenerateEmail(List<Usuario> usuarios)
         {
-            // primero conseguimos el texto con el nombre y apellido de maximo 3 chars cada uno
             string firstPart = TextoDeTresLetras(Nombre) + TextoDeTresLetras(Apellido);
-            // buscamos el numero que corresponde para el nuevo mail
             int numero = NumeroParaNuevoEmail(firstPart, usuarios);
             if (numero > 0)
             {

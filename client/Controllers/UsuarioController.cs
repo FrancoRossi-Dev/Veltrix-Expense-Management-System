@@ -55,7 +55,7 @@ namespace client.Controllers
             string? roles = HttpContext.Session.GetString("loggedUserRoles");
          
             Usuario user = s.getUserById(id);
-            double totalThisMonth = s.CalcTotalOfMonth(user, DateTime.Now);
+            decimal totalThisMonth = s.CalcTotalOfMonth(user, DateTime.Now);
             ViewData["totalThisMonth"] = totalThisMonth;
             
             if (roles != null && roles.Contains("Gerente"))

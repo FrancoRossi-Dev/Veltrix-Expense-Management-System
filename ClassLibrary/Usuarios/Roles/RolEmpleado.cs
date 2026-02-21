@@ -11,6 +11,7 @@ namespace Domain.Usuarios.Roles
         public RolEmpleado() : base()
         {
             Titulo = "Empleado";
+            BudgetMod = 1m;
         }
 
     }

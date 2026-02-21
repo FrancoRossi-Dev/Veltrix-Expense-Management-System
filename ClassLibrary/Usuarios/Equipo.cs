@@ -13,15 +13,18 @@ namespace Domain.Usuarios
         static public int IdCount { get; set; } = 1;
         public string Nombre { get; set; }
 
+        public decimal Budget { get; set; }
+
         public Equipo()
         {
             Id = IdCount++;
         }
 
-        public Equipo(string nombre)
+        public Equipo(string nombre, decimal budget)
         {
             Id = IdCount++;
             Nombre = nombre;
+            Budget = budget;
             Validate();
         }
 
@@ -33,6 +36,13 @@ namespace Domain.Usuarios
         public void Validate()
         {
             ValidateNombre();
+            ValidateBudget();
+        }
+
+        private void ValidateBudget()
+        {
+            if (Budget < 0) throw new Exception
+                    ("No se puede ingresar un presupuesto negativo");
         }
 
         private void ValidateNombre()

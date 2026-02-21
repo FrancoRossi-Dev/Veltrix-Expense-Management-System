@@ -1,0 +1,49 @@
+﻿@using Domain.Pagos
+@using System.Text.Json
+@using webApp.DTO
+@model IEnumerable<MonthlyTotalDto>;
+
+<div>
+    <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartSourceData = @Html.Raw(
+                JsonSerializer.Serialize(Model)
+        );
+
+    console.log("chartSourceData:", chartSourceData);
+    console.log("first item:", chartSourceData[0]);
+
+    (function () {
+        const canvas = document.getElementById('myChart');
+        if (!canvas || !chartSourceData?.length) return;
+
+        const labels = chartSourceData.map(x => x.Month);
+        const values = chartSourceData.map(x => x.Total);
+
+        const data = {
+            labels,
+            datasets: [{
+                data: values,
+                borderColor: '#17E35B',
+                backgroundColor: '#11BF4B',
+                pointRadius: 6,
+                pointHoverRadius: 10
+            }]
+        };
+
+        new Chart(canvas, {
+            type: 'line',
+            data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                }
+            }
+        });
+    })();
+</script>

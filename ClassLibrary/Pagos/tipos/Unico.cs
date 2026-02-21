@@ -1,17 +1,16 @@
-﻿using Domain.Pagos;
-using Domain.Usuarios;
+﻿using Domain.Usuarios;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Pagos
+namespace Domain.Pagos.tipos
 {
     public class Unico : Pago
     {
-        static internal double BENEFICIO_PAGO_UNICO = -0.10;
-        static internal double BENEFICIO_PAGO_EFECTIVO = -0.10;
+        static internal decimal BENEFICIO_PAGO_UNICO = -0.10m;
+        static internal decimal BENEFICIO_PAGO_EFECTIVO = -0.10m;
 
         public DateTime FechaDePago { get; set; }
         public string NroRecibo { get; set; }
@@ -20,7 +19,7 @@ namespace Domain.Pagos
         {
         }
 
-        public Unico(double montoInicial, MetodoDePago metodo, TipoDeGasto tipoGasto, Usuario usuario, string descripcion, DateTime fechaDePago, string nroRecibo) : base(montoInicial, metodo, tipoGasto, usuario, descripcion)
+        public Unico(decimal montoInicial, MetodoDePago metodo, TipoDeGasto tipoGasto, Usuario usuario, string descripcion, DateTime fechaDePago, string nroRecibo) : base(montoInicial, metodo, tipoGasto, usuario, descripcion)
         {
             FechaDePago = fechaDePago;
             NroRecibo = nroRecibo;
@@ -29,9 +28,9 @@ namespace Domain.Pagos
             MontoTotal = CalcTotal();
         }
 
-        public override double CalcTotal()
+        public override decimal CalcTotal()
         {
-            double modificador = 1;
+            decimal modificador = 1;
             modificador += BENEFICIO_PAGO_UNICO;
             if (Metodo == MetodoDePago.EFECTIVO) modificador += BENEFICIO_PAGO_EFECTIVO;
             return Math.Round(MontoInicial * modificador);
@@ -69,7 +68,7 @@ namespace Domain.Pagos
 
         private void ValidateRecibo()
         {
-            if (String.IsNullOrEmpty(NroRecibo)) throw new Exception("Debe ingresar un numero de recibo");
+            if (string.IsNullOrEmpty(NroRecibo)) throw new Exception("Debe ingresar un numero de recibo");
         }
 
         public override string TipoDePago()
@@ -85,10 +84,10 @@ namespace Domain.Pagos
 
         public override string MiModificador()
         {
-            double modificador = 1;
+            decimal modificador = 1;
             modificador += BENEFICIO_PAGO_UNICO;
             if (Metodo == MetodoDePago.EFECTIVO) modificador += BENEFICIO_PAGO_EFECTIVO;
-            string modificadorString = $"-%{Math.Ceiling((1 - modificador) * 100)}";
+            string modificadorString = $"-{Math.Ceiling((1 - modificador) * 100)} %";
             return modificadorString;
         }
     }

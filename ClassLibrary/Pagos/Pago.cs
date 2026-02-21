@@ -14,7 +14,7 @@ namespace Domain.Pagos
         public int Id { get; set; }
         static public int IdCount { get; set; } = 1;
 
-        public double MontoInicial { get; set; }
+        public decimal MontoInicial { get; set; }
 
         public MetodoDePago Metodo { get; set; }
 
@@ -23,14 +23,14 @@ namespace Domain.Pagos
         public Usuario Usuario { get; set; }
 
         public string Descripcion { get; set; }
-        public double MontoTotal { get; set; }
+        public decimal MontoTotal { get; set; }
 
         public Pago()
         {
             Id = IdCount++;
         }
 
-        protected Pago(double montoInicial, MetodoDePago metodo, TipoDeGasto tipoGasto, Usuario usuario, string descripcion)
+        protected Pago(decimal montoInicial, MetodoDePago metodo, TipoDeGasto tipoGasto, Usuario usuario, string descripcion)
         {
             Id = IdCount++;
             MontoInicial = montoInicial;
@@ -68,7 +68,7 @@ namespace Domain.Pagos
             return Id.CompareTo(other.Id);
         }
         abstract public bool DelMes(DateTime? fecha);
-        abstract public double CalcTotal();
+        abstract public decimal CalcTotal();
 
         public abstract string TipoDePago();
         public abstract string MiFechaDePago();

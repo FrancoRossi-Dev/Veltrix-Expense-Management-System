@@ -1,10 +1,13 @@
 ﻿@using Domain.Pagos
-@model Pago
+@using webApp.DTO
+@using webApp.ViewModels
+@model PagoViewModel
 
 @{
     ViewData["Title"] = "Mis Pagos";
     IEnumerable<Pago> pagosDelMes = ViewBag.pagosDelMes;
     IEnumerable<TipoDeGasto>? tiposDeGastoEnSistema = ViewData["tiposDeGastoEnSistema"] as IEnumerable<TipoDeGasto>;
+    IEnumerable<MonthlyTotalDto>? totalsLastMonth = ViewData["totalsLastMonth"] as IEnumerable<MonthlyTotalDto>;
 }
 <h1>@ViewBag.msg</h1>
 <div class="flex-row">
@@ -70,31 +73,19 @@
         {
             <p>No hay gastos para este mes.</p>
         }
+        @await Html.PartialAsync("_expensesChart", totalsLastMonth)
+
+
+
     </section>
+
 
 
 </div>
 
-<style>
-    .PaymentTypeSelector {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 275px;
-    }
-
-        .PaymentTypeSelector label {
-            font-weight: 700 !important;
-        }
-
-        .PaymentTypeSelector select {
-            background-color: var(--color-neutral-900);
-            margin-bottom: 0;
-        }
-</style>
-
 
 @section Scripts {
+
     <script type="module">
         import { addRowToTable } from '/js/formFunctions.js';
 
@@ -132,9 +123,8 @@
                         return;
                     }
 
-                    // Muestra datos de los pagos del usuario para el mes actual. Se muestra para cada pago su tipo (Unico o Recurrente), la descripción, la fecha (fecha de pago para Unicos y fecha de inicio para Recurrentes), el método de pago y el monto con los recargos y descuentos aplicados.
-                    
-                    
+
+
                     toast("Pago procesado correctamente", "success");
                     const cuotasField = document.querySelector("#cuotas");
                     const cuotasFieldLabel = document.querySelector("#cuotas-label");
@@ -165,7 +155,7 @@
                         const Vactual = (Voriginal + montoNuevo).toFixed(2);
                         totalField.textContent = `u$d ${Vactual}`;
                     }
-                    
+
 
                 } catch (err) {
                     console.error("Error enviando el formulario:", err);

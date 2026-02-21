@@ -11,6 +11,7 @@ namespace Domain.Usuarios.Roles
         public int Id { get; set; }
         static private int IdCount { get; set; } = 1;
         public string Titulo { get; set; }
+        public decimal BudgetMod { get; internal set; }
 
         public Rol()
         {
