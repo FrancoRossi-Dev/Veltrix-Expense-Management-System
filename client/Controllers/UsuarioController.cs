@@ -5,6 +5,9 @@ using Domain.Usuarios;
 using Domain.Usuarios.Roles;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections;
+using webApp.DTO;
+using webApp.Mappers;
+using webApp.ViewModels;
 
 namespace client.Controllers
 {
@@ -51,21 +54,26 @@ namespace client.Controllers
         [UserLoggedFilter]
         public IActionResult Index()
         {
+            UsuarioViewModel UsuarioVM = new();
             int? id = HttpContext.Session.GetInt32("loggedUserId");
             string? roles = HttpContext.Session.GetString("loggedUserRoles");
-         
-            Usuario user = s.getUserById(id);
-            decimal totalThisMonth = s.CalcTotalOfMonth(user, DateTime.Now);
-            ViewData["totalThisMonth"] = totalThisMonth;
             
+            Usuario user = s.getUserById(id);
+            UsuarioVM.Usuario = UsuarioMapper.ToDto(user);
+
+            UsuarioVM.TotalThisMonth = s.CalcTotalOfMonth(user, DateTime.Now);
+
+
             if (roles != null && roles.Contains("Gerente"))
             {
                 IEnumerable<Usuario> usuariosDelEquipo = s.GetUsuariosPorEquipo(user.Equipo.Nombre);
-                ViewData["ListaEquipo"] = usuariosDelEquipo;
+                IEnumerable<UsuarioDto> usuariosDelEquipoDto = usuariosDelEquipo.Select((u) => UsuarioMapper.ToDto(u));
+                UsuarioVM.UsuariosDelEquipo = usuariosDelEquipoDto;
             }
 
-            return View(user);
+            return View(UsuarioVM);
         }
+
 
         [HttpPost]
         [UserLoggedFilter]

@@ -1,5 +1,5 @@
 ﻿@using Domain.Pagos
-@model IEnumerable<TipoDeGasto>;
+@model TipoDeGastoViewModel;
 
 @{
     ViewData["Title"] = "Tipos de gastos";
@@ -7,7 +7,7 @@
 }
 <div class="flex-row">
     <section>
-        <h2>Crear un nuevo</h2>
+        <h2>Crear</h2>
 
         <form id="create-tipoDeGasto" method="post" action="Create">
             <label for="nombre">Nombre</label>
@@ -20,7 +20,7 @@
         </form>
     </section>
     <section class="section-table">
-        @if (!ListaVacia)
+        @if (Model.TiposDeGasto != null)
         {
         <h3>Tipos de gasto registrados</h3>
             <table>
@@ -33,7 +33,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (TipoDeGasto t in Model)
+                    @foreach (TipoDeGasto t in Model.TiposDeGasto)
                     {
                         if (t.IsActive)
                         {

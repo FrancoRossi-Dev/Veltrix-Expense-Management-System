@@ -108,7 +108,7 @@ namespace client.Controllers
             EquipoVM.MonthExpenses = monthExpensesDto;
 
             return View(EquipoVM);
-        }
+        }       
 
         [HttpPost]
         [UserHasAccessFilter("Empleado")]

@@ -2,6 +2,7 @@
 using Domain;
 using Domain.Pagos;
 using Microsoft.AspNetCore.Mvc;
+using webApp.ViewModels;
 
 namespace client.Controllers
 {
@@ -13,12 +14,9 @@ namespace client.Controllers
         public IActionResult Index()
         {
             List<TipoDeGasto> g = s.GetTipoDeGastosActivos();
-            if (g.Count > 0)
-            {
-                return View(g);
-            }
-            ViewBag.status = "ListaVacia";
-            return View(g);
+            TipoDeGastoViewModel TipoDeGastoVM = new();
+            TipoDeGastoVM.TiposDeGasto = g.Count > 0 ? g : null;
+            return View(TipoDeGastoVM);
         }
 
         [HttpPost]
