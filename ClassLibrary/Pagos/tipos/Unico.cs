@@ -60,7 +60,7 @@ namespace Domain.Pagos.tipos
 
         private void ValidateFecha()
         {
-            DateTime hoy = DateTime.Now;
+            DateTime hoy = DateTime.Now.AddMonths(1);
 
             if (FechaDePago > hoy)
                 throw new Exception("fecha invalida, la fecha debe estar en el pasado");

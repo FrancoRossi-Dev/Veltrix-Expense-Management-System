@@ -2,13 +2,8 @@
 using Domain.Pagos.tipos;
 using Domain.Usuarios;
 using Domain.Usuarios.Roles;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Domain
 {
@@ -495,5 +490,26 @@ namespace Domain
 
             return budget;
         }
+
+
+        public BudgetStatus ValidateBudget(Pago payment)
+        {
+            decimal total = payment.CalcTotal();
+            decimal budget = payment.Usuario.CalcPersonalBudget();
+            decimal UserMonthly = CalcTotalOfMonth(payment.Usuario, DateTime.Now);
+            if (total + UserMonthly > budget) return BudgetStatus.Over;
+            if (total + UserMonthly > budget * 0.8m) return BudgetStatus.Close;
+            return BudgetStatus.Allowed;
+        }
+
+        private static readonly DateTime FECHA_BASE_ORIGINAL = new DateTime(2025, 11, 25);
+        private readonly DateTime _today = DateTime.Today;
+
+        private DateTime FechaRelativa(DateTime fechaOriginal)
+        {
+            int diferenciaDias = (fechaOriginal - FECHA_BASE_ORIGINAL).Days;
+            return _today.AddDays(diferenciaDias);
+        }
+
     }
 }

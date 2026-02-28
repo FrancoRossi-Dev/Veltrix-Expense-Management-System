@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaDePagos", "SistemaDePagos\SistemaDePagos.csproj", "{D211212A-B2DF-4D84-92A1-8A96DEA17F39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "SistemaDePagos\ConsoleApp.csproj", "{D211212A-B2DF-4D84-92A1-8A96DEA17F39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "ClassLibrary\Domain.csproj", "{0D5176AB-226F-485A-85D5-88BFD8AD0145}"
 EndProject

@@ -5,6 +5,7 @@ using Domain.Pagos;
 using Domain.Pagos.tipos;
 using Domain.Usuarios;
 using Microsoft.AspNetCore.Mvc;
+using Mono.TextTemplating;
 using System.Globalization;
 using webApp.DTO;
 using webApp.ViewModels;
@@ -57,7 +58,7 @@ namespace client.Controllers
         public IActionResult Equipo()
         {
             EquipoViewModel EquipoVM = new();
-            
+
             int? id = HttpContext.Session.GetInt32("loggedUserId");
             Usuario gerente = s.getUserById(id);
 
@@ -108,7 +109,7 @@ namespace client.Controllers
             EquipoVM.MonthExpenses = monthExpensesDto;
 
             return View(EquipoVM);
-        }       
+        }
 
         [HttpPost]
         [UserHasAccessFilter("Empleado")]
@@ -127,6 +128,8 @@ namespace client.Controllers
                     msg = "tipo de gasto o usuario desconocido"
                 });
             }
+
+
             try
             {
                 if (typeOfPayment == "unico")
@@ -167,23 +170,101 @@ namespace client.Controllers
 
         private IActionResult CreateUnico(Unico u)
         {
+            if (u == null)
+            {
+                return Json(new
+                {
+                    state = "error",
+                    msg = "Datos inválidos"
+                });
+            }
+
             try
             {
                 u.Validate();
-                s.AltaPago(u);
 
+                BudgetStatus BStatus = s.ValidateBudget(u);
+                if (BStatus == BudgetStatus.Over) return Json(new
+                {
+                    state = "error",
+                    msg = "El pago supera el presupuesto menusal"
+                });
+                s.AltaPago(u);
+                string state = BStatus == BudgetStatus.Allowed ? "success" : "warning";
+                string msg = BStatus == BudgetStatus.Allowed ? "Pago ingresado con exito" : "Pago ingresado, cerca del límite";
+                return Json(MapPagoResponse(u, state, msg));
+
+            }
+            catch (Exception ex)
+            {
                 return Json(new
                 {
-                    TipoDePago = u.TipoDePago(),
-                    Descripcion = u.Descripcion,
-                    FechaPago = u.MiFechaDePago(),
-                    TipoDeGasto = u.TipoGasto.Nombre,
-                    Metodo = u.Metodo.ToString(),
-                    MontoTotal = u.MontoTotal,
-                    Modificador = u.MiModificador(),
-                    state = "exito",
-                    msg = "Pago creado con exito"
+                    state = "error",
+                    msg = ex.Message
                 });
+            }
+        }
+        private IActionResult CreateCuotas(Cuotas c)
+        {
+
+            if (c == null)
+            {
+                return Json(new
+                {
+                    state = "error",
+                    msg = "Datos inválidos"
+                });
+            }
+            try
+            {
+                c.Validate();
+                BudgetStatus BStatus = s.ValidateBudget(c);
+                if (BStatus == BudgetStatus.Over) return Json(new
+                {
+                    state = "error",
+                    msg = "El pago supera el presupuesto menusal"
+                });
+                s.AltaPago(c);
+                string state = BStatus == BudgetStatus.Allowed ? "success" : "warning";
+                string msg = BStatus == BudgetStatus.Allowed ? "Pago en cuotas ingresado con exito" : "Pago ingresado, cerca del límite";
+                return Json(MapPagoResponse(c, state, msg));
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    state = "error",
+                    msg = ex.Message,
+                });
+            }
+
+        }
+
+        private IActionResult CreateSubscription(Subscripcion sub)
+        {
+            if (sub == null)
+            {
+                return Json(new
+                {
+                    state = "error",
+                    msg = "Datos inválidos"
+                });
+            }
+
+            try
+            {
+                sub.Validate();
+                BudgetStatus BStatus = s.ValidateBudget(sub);
+                if (BStatus == BudgetStatus.Over) return Json(new
+                {
+                    state = "error",
+                    msg = "El pago supera el presupuesto menusal"
+                });
+                s.AltaPago(sub);
+                string state = BStatus == BudgetStatus.Allowed ? "success" : "warning";
+                string msg = BStatus == BudgetStatus.Allowed ? "Subscripción ingresada con exito" : "Pago ingresado, cerca del límite";
+                return Json(MapPagoResponse(sub, state, msg));
             }
             catch (Exception ex)
             {
@@ -195,62 +276,20 @@ namespace client.Controllers
             }
         }
 
-        private IActionResult CreateCuotas(Cuotas c)
+        private object MapPagoResponse(Pago p, string state, string msg)
         {
-
-            if (c != null)
+            return new
             {
-                c.Validate();
-                s.AltaPago(c);
-
-                return Json(new
-                {
-                    TipoDePago = c.TipoDePago(),
-                    Descripcion = c.Descripcion,
-                    FechaPago = c.MiFechaDePago(),
-                    TipoDeGasto = c.TipoGasto.Nombre,
-                    Metodo = c.Metodo.ToString(),
-                    MontoTotal = c.MontoTotal,
-                    Modificador = c.MiModificador(),
-                    state = "exito",
-                    msg = "Pago en cuotas ingresado con exito"
-                });
-            }
-
-            return Json(new
-            {
-                state = "error",
-                msg = "Error en el controlador"
-            });
-        }
-
-        private IActionResult CreateSubscription(Subscripcion sub)
-        {
-
-            if (sub != null)
-            {
-                sub.Validate();
-                s.AltaPago(sub);
-
-                return Json(new
-                {
-                    TipoDePago = sub.TipoDePago(),
-                    Descripcion = sub.Descripcion,
-                    FechaPago = sub.MiFechaDePago(),
-                    TipoDeGasto = sub.TipoGasto.Nombre,
-                    Metodo = sub.Metodo.ToString(),
-                    MontoTotal = sub.MontoTotal,
-                    Modificador = sub.MiModificador(),
-                    state = "exito",
-                    msg = "Subscripcion ingresada con exito"
-                });
-            }
-
-            return Json(new
-            {
-                state = "error",
-                msg = "Error en el controlador"
-            });
+                TipoDePago = p.TipoDePago(),
+                Descripcion = p.Descripcion,
+                FechaPago = p.MiFechaDePago(),
+                TipoDeGasto = p.TipoGasto.Nombre,
+                Metodo = p.Metodo.ToString(),
+                MontoTotal = p.MontoTotal,
+                Modificador = p.MiModificador(),
+                state,
+                msg
+            };
         }
     }
 }

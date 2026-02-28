@@ -39,7 +39,7 @@ namespace Domain.Pagos
             Usuario = usuario;
             Descripcion = descripcion;
         }
-        
+
         public override string ToString()
         {
             return $"id: {Id}, item: {Descripcion}, metodo de pago: {Metodo}, total: {MontoTotal:F2}";
@@ -58,7 +58,7 @@ namespace Domain.Pagos
 
         private void ValidateDescripcion()
         {
-            if (String.IsNullOrEmpty(Descripcion)) 
+            if (String.IsNullOrEmpty(Descripcion))
                 throw new ArgumentException("Se debe describir el gasto");
         }
         public int CompareTo(Pago other)
