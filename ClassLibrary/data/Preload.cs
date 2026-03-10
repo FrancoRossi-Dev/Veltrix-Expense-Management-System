@@ -12,13 +12,17 @@ namespace Domain.data
 {
     internal class Preload
     {
-        public Sistema Sys { get; set; } = Sistema.GetSistema();
-        public Preload() {
+        private Sistema Sys;
+
+        public Preload(Sistema sistema)
+        {
+            Sys = sistema;
         }
-        
+
         public void Precarga()
         {
-            // Precarga actualizada para Noviembre 2025
+            if (Sys.GetUsuarios().Count > 0) return;
+
             PrecargaRoles();
             PrecargaEquipos();
             PrecargaUsuarios();

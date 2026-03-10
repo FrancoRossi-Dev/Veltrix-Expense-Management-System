@@ -13,7 +13,7 @@ namespace client.Controllers
 {
     public class UsuarioController : Controller
     {
-        Sistema s = Sistema.GetSistema();
+        Sistema s = Sistema.Instance;
 
         public IActionResult Login()
         {

@@ -10,7 +10,7 @@ namespace client.Controllers
     [UserHasAccessFilter("Gerente")]
     public class TipoDeGastoController : Controller
     {
-        Sistema s = Sistema.GetSistema();
+        Sistema s = Sistema.Instance;
         public IActionResult Index()
         {
             List<TipoDeGasto> g = s.GetTipoDeGastosActivos();

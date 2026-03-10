@@ -16,7 +16,7 @@ namespace client.Controllers
 
     public class PagoController : Controller
     {
-        Sistema s = Sistema.GetSistema();
+        Sistema s = Sistema.Instance;
 
         [UserHasAccessFilter("Empleado")]
         public IActionResult Index()

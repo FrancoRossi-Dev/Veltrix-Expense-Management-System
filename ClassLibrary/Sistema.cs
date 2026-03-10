@@ -10,22 +10,18 @@ namespace Domain
 {
     public class Sistema
     {
-        private Sistema()
-        {
-        }
+       private static readonly Lazy<Sistema> _instance =
+           new Lazy<Sistema>(() =>
+           {
+               var sistema = new Sistema();
+               new Preload(sistema).Precarga();
+               return sistema;
+           });
 
-        static private Sistema? _sistema = null;
-        static public Sistema GetSistema()
-        {
-            if (_sistema == null)
-            {
-                _sistema = new Sistema();
-                Preload preload = new();
-                preload.Precarga();
+        public static Sistema Instance => _instance.Value;
 
-            }
-            return _sistema;
-        }
+        private Sistema() { }
+
 
         #region Lists
 
@@ -221,7 +217,7 @@ namespace Domain
             return Usuario.Dominio;
         }
 
-        public Equipo GetEquipoByName(string? nombreEquipo)
+        public Equipo? GetEquipoByName(string? nombreEquipo)
         {
             Equipo match = null;
             foreach (Equipo equipo in _equipos)
@@ -242,7 +238,7 @@ namespace Domain
             throw new Exception("El tipo de gasto no existe.");
         }
 
-        public Usuario getUserById(int? id)
+        public Usuario? getUserById(int? id)
         {
             foreach (Usuario user in _usuarios)
             {
@@ -323,11 +319,11 @@ namespace Domain
         public decimal CalcTeamBudget(string team)
         {
             decimal budget = 0;
-            
+
             List<Usuario> usuarios = GetUsuariosPorEquipo(team);
             foreach (Usuario u in usuarios)
             {
-                    budget += u.CalcPersonalBudget();
+                budget += u.CalcPersonalBudget();
             }
 
             return budget;
