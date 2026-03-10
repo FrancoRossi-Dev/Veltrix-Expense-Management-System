@@ -77,7 +77,7 @@ namespace client.Controllers
 
             MonthExpensesDto monthExpensesDto = new();
             monthExpensesDto.Expenses = s.GetTotalPagosByList(pagosDelEquipo);
-            monthExpensesDto.MyBudget = s.CalcTeamBudget(gerente.Equipo.Id);
+            monthExpensesDto.MyBudget = s.CalcTeamBudget(gerente.Equipo.Nombre);
 
             EquipoVM.MonthExpenses = monthExpensesDto;
             return View(EquipoVM);
@@ -105,7 +105,7 @@ namespace client.Controllers
 
             MonthExpensesDto monthExpensesDto = new();
             monthExpensesDto.Expenses = s.GetTotalPagosByList(pagosDelEquipo);
-            monthExpensesDto.MyBudget = s.CalcTeamBudget(gerente.Equipo.Id);
+            monthExpensesDto.MyBudget = s.CalcTeamBudget(gerente.Equipo.Nombre);
             EquipoVM.MonthExpenses = monthExpensesDto;
 
             return View(EquipoVM);

@@ -320,15 +320,14 @@ namespace Domain
             return false;
         }
 
-        public decimal CalcTeamBudget(int id)
+        public decimal CalcTeamBudget(string team)
         {
             decimal budget = 0;
-            foreach (Usuario u in _usuarios)
+            
+            List<Usuario> usuarios = GetUsuariosPorEquipo(team);
+            foreach (Usuario u in usuarios)
             {
-                if (u.Id == id)
-                {
                     budget += u.CalcPersonalBudget();
-                }
             }
 
             return budget;
